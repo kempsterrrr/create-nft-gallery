@@ -9,5 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.10.0"
+  "packageManager": "pnpm@10.10.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/your-package.git"
+  },
 }
