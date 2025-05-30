@@ -2,6 +2,12 @@
 
 A CLI tool to scaffold NFT gallery applications for Arweave Name System (ArNS) domains. This tool helps you quickly set up a gallery to showcase your NFT collection with support for different blockchain platforms.
 
+## TODOs
+
+- [ ] Add wayfinder + image component from original example
+- [ ] Add deployment scripts from original repo
+- [ ] Add support for ETH and Solana wallets for ArNS and permaweb-deploy
+
 ## Installation
 
 ```bash
@@ -101,11 +107,6 @@ npm run fetch-metadata
 # test local build
 npm run dev
 ```
-
-## TODOs
-
-- [ ] Add wayfinder + image component from original example
-- [ ] Add deployment scripts from original repo
 
 ## License
 
