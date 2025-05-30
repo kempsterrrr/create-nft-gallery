@@ -1,0 +1,70 @@
+import { publicKey } from "@metaplex-foundation/umi";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { dasApi } from "@metaplex-foundation/digital-asset-standard-api";
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
+const NFT_CONTRACT_ADDRESS = process.env.NFT_CONTRACT_ADDRESS;
+
+// Validate required environment variables
+if (!RPC_ENDPOINT || !NFT_CONTRACT_ADDRESS) {
+  console.error('Error: Missing required environment variables. Please check your .env file.');
+  process.exit(1);
+}
+
+const umi = createUmi(RPC_ENDPOINT).use(dasApi());
+const COLLECTION_MINT = publicKey(NFT_CONTRACT_ADDRESS);
+
+const assets = await umi.rpc.getAssetsByGroup({
+  groupKey: "collection",
+  groupValue: COLLECTION_MINT.toString(),
+});
+
+let collectionMetadata = [];
+
+const delay = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+// Process items with 200ms delay between each (5 times per second)
+for (const asset of Object.values(assets.items)) {
+  const assetMetadata = await umi.rpc.getAsset(asset.id);
+  
+  // Transform to our standard format
+  const transformedMetadata = {
+    name: assetMetadata.content.metadata.name,
+    description: assetMetadata.content.metadata.description || '',
+    image: assetMetadata.content.files[0]?.uri || '',
+    animation_url: assetMetadata.content.files.find((f: { mimeType?: string }) => f.mimeType?.startsWith('video/'))?.uri,
+    external_url: assetMetadata.content.metadata.external_url,
+    attributes: assetMetadata.content.metadata.attributes?.map((attr: { trait_type?: string; value: unknown }) => ({
+      trait_type: attr.trait_type || 'Unknown',
+      value: String(attr.value)
+    })) || []
+  };
+  
+  collectionMetadata.push(transformedMetadata);
+  console.log(`${transformedMetadata.name} added to array`);
+  await delay(200);
+}
+
+// Create data directory if it doesn't exist
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const dataDir = join(__dirname, '..', 'data');
+if (!fs.existsSync(dataDir)){
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Write metadata to JSON file
+fs.writeFileSync(
+    join(dataDir, 'collection-metadata.json'),
+    JSON.stringify(collectionMetadata, null, 2)
+);
+
+console.log('Metadata saved to collection-metadata.json');
+

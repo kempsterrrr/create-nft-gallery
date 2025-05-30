@@ -1,0 +1,58 @@
+# <%= name %>
+
+An NFT gallery application built with React, Vite, and TypeScript, configured for Arweave Name System (ArNS) domains.
+
+## Features
+
+- React + TypeScript + Vite
+- Tailwind CSS for styling
+- Arweave integration via @ar.io/sdk
+- Environment variable support
+- Responsive NFT gallery layout
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Configure environment variables:
+   Create a `.env` file in the root directory with the following variables:
+   ```env
+   ARNS_NAME=<%= ARNS_NAME %>
+   NFT_CONTRACT_ADDRESS=<%= NFT_CONTRACT_ADDRESS %>
+   RPC_ENDPOINT=<%= RPC_ENDPOINT %>
+   DEPLOY_KEY=# Your base64-encoded Arweave wallet key
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## Project Structure
+
+```
+src/
+├── components/
+│   └── Gallery.tsx    # Main NFT gallery component
+├── App.tsx            # Root component
+├── index.tsx          # Entry point
+└── index.css          # Global styles
+```
+
+## Development
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+
+## License
+
+MIT 

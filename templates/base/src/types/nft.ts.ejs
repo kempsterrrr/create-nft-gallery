@@ -1,0 +1,21 @@
+export type NFTAttribute = {
+  trait_type: string;
+  value: string;
+};
+
+export type NFTMetadata = {
+  name: string;
+  description: string;
+  image: string;
+  animation_url?: string;
+  external_url?: string;
+  attributes: NFTAttribute[];
+};
+
+export type NFTCollection = NFTMetadata[];
+
+// Base interface that all platform-specific implementations must follow
+export interface NFTDataFetcher {
+  fetchCollectionData(contractAddress: string): Promise<NFTCollection>;
+  validateMetadata(metadata: NFTMetadata): boolean;
+} 

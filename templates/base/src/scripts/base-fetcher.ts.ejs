@@ -1,0 +1,80 @@
+import { NFTMetadata, NFTCollection, NFTDataFetcher } from '../types/nft.js';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
+import path from 'path';
+
+// Configuration
+const dataDir = path.join(process.cwd(), 'src', 'data');
+const outputFile = path.join(dataDir, 'collection-metadata.json');
+
+// Validation function
+export const validateMetadata = (metadata: NFTMetadata): boolean => {
+  const requiredFields = ['name', 'description', 'image', 'attributes'];
+  const missingFields = requiredFields.filter(field => !metadata[field]);
+  
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  }
+
+  if (!Array.isArray(metadata.attributes)) {
+    throw new Error('Attributes must be an array');
+  }
+
+  const invalidAttributes = metadata.attributes.filter(
+    attr => !attr.trait_type || !attr.value
+  );
+
+  if (invalidAttributes.length > 0) {
+    throw new Error('Invalid attributes format. Each attribute must have trait_type and value');
+  }
+
+  return true;
+};
+
+// Save collection data function
+export const saveCollectionData = async (collection: NFTCollection): Promise<void> => {
+  // Ensure data directory exists
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  // Validate each NFT's metadata
+  collection.forEach((metadata, index) => {
+    try {
+      validateMetadata(metadata);
+    } catch (error) {
+      throw new Error(`Invalid metadata at index ${index}: ${error.message}`);
+    }
+  });
+
+  // Save to file
+  await fsPromises.writeFile(outputFile, JSON.stringify(collection, null, 2));
+  console.log(`\n✅ Collection data written to ${outputFile}`);
+};
+
+// Retry function
+export const fetchWithRetry = async <T>(
+  fetchFn: () => Promise<T>,
+  retries = 3,
+  delay = 1000
+): Promise<T> => {
+  try {
+    return await fetchFn();
+  } catch (error) {
+    if (retries === 0) throw error;
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return fetchWithRetry(fetchFn, retries - 1, delay * 2);
+  }
+};
+
+export abstract class BaseNFTFetcher implements NFTDataFetcher {
+  protected readonly dataDir: string;
+  protected readonly outputFile: string;
+
+  constructor() {
+    this.dataDir = dataDir;
+    this.outputFile = outputFile;
+  }
+
+  abstract fetchCollectionData(contractAddress: string): Promise<NFTCollection>;
+} 

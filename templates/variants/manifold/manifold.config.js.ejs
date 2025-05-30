@@ -1,0 +1,10 @@
+import { defineConfig } from 'vite';
+import baseConfig from '../../base/vite.config';
+
+export default defineConfig({
+  ...baseConfig,
+  define: {
+    ...baseConfig.define,
+    'process.env.MANIFOLD_API_KEY': JSON.stringify(process.env.MANIFOLD_API_KEY),
+  },
+}); 
